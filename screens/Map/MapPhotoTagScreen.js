@@ -12,6 +12,7 @@ import {
   Share,
   Modal,
 } from 'react-native';
+import axios from 'axios';
 import NavigationBar from 'react-native-navbar';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
@@ -58,7 +59,8 @@ class MapPhotoTagScreen extends React.Component {
     comment: '',
     upvotes: this.props.navigation.state.params.upvotes,
     downvotes: this.props.navigation.state.params.downvotes,
-    voteTotal: this.props.navigation.state.params.upvotes - this.props.navigation.state.params.downvotes,
+    voteTotal:
+      this.props.navigation.state.params.upvotes - this.props.navigation.state.params.downvotes,
     phototag: this.props.navigation.state.params,
     comments: [],
     modalVisibility: false,
@@ -282,6 +284,14 @@ class MapPhotoTagScreen extends React.Component {
       updatedPhototag.favTotal -= 1;
       this.props.updatePhototag(this.state.phototag);
     }
+    axios
+      .post('http://cd41a62b.ngrok.io/notification', {
+        message: `someone liked your tag with description "${this.state.phototag.description}"`,
+        userid: this.state.phototag.userId,
+      })
+      .then(res => {
+        console.log(res.data);
+      });
   };
 
   editComment(text) {
@@ -327,6 +337,15 @@ class MapPhotoTagScreen extends React.Component {
 
     // 3. Adds the commentId under the phototag 'comments' node
     this.props.updatePhototagWithComment(phototagId, commentId);
+    axios
+      .post('http://cd41a62b.ngrok.io/notification', {
+        message: `someone commented "${this.state.comment}" on on your tag  "${this.state.phototag
+          .description}"`,
+        userid: this.state.phototag.userId,
+      })
+      .then(res => {
+        console.log(res.data);
+      });
   };
 
   share = () => {
@@ -380,7 +399,7 @@ class MapPhotoTagScreen extends React.Component {
             style={{ width: '100%', height: '100%', resizeMode: Image.resizeMode.contain }}
             source={{ uri: this.state.phototag.imageUrl }}
           />
-          <TaggedText navigation={this.props.navigation} text={this.state.phototag.description}/>
+          <TaggedText navigation={this.props.navigation} text={this.state.phototag.description} />
         </View>
         <Modal
           animationType={'slide'}
